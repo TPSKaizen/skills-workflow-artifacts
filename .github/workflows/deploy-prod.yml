@@ -1,0 +1,36 @@
+name: Deploy Prod
+
+# Define Triggers
+on:
+    workflow_run:
+        workflows: ["Build and Deploy"]
+        types:
+        - completed
+
+# Define Permissions
+permissions:
+    contents: read
+    actions: read
+
+# Define jobs:
+jobs:
+    prod:
+        name: Deploy Prod
+        runs-on: ubuntu-latest
+        if: github.event.workflow_run.conclusion == 'success' # ensures this job only runs if the triggering workflow completed successfully - without errors.
+        environment: prod
+        steps:
+        - uses: actions/download-artifact@v8
+          with:
+            name: octomatch
+            path: website
+            run-id: ${{ github.event.workflow_run.id }}
+            github-token: ${{ secrets.GITHUB_TOKEN }}
+
+        - name: Deploy to Production
+          run: |
+            echo "dwonloaded aritfact contents:"
+            tree website
+            echo "Demo deploy step: replace with real deploy command"
+
+          
